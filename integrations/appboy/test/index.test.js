@@ -21,7 +21,8 @@ describe('Appboy', function() {
     customEndpoint: '',
     version: 1,
     onlyTrackKnownUsersOnWeb: false, // Default off.
-    logPurchaseWhenRevenuePresent: false
+    logPurchaseWhenRevenuePresent: false,
+    sdkAuthentication: false, // Defaults off.
   };
 
   beforeEach(function() {
@@ -64,6 +65,7 @@ describe('Appboy', function() {
         .option('customEndpoint', '')
         .option('logPurchaseWhenRevenuePresent', false)
         .option('version', 1)
+        .option('sdkAuthentication', false);
     );
   });
 
@@ -145,11 +147,11 @@ describe('Appboy', function() {
       analytics.initialize();
     });
 
-    it('should use initializeV3 if version is set to 3.1', function(done) {
+    it('should use initializeV3 if version is set to 3.3', function(done) {
       var V1spy = sinon.spy(appboy, 'initializeV1');
       var V2spy = sinon.spy(appboy, 'initializeV2');
       var V3spy = sinon.spy(appboy, 'initializeV3');
-      appboy.options.version = 3.1;
+      appboy.options.version = 3.3;
       analytics.once('ready', function() {
         try {
           assert(V3spy.called);
@@ -205,6 +207,23 @@ describe('Appboy', function() {
           analytics.assert(
             spy.args[0][1].safariWebsitePushId,
             options.safariWebsitePushId
+          );
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+      analytics.initialize();
+    });
+    
+    it('should enable sdkAuthentication provided in the settings', function(done) {
+      appboy.options.sdkAuthentication = true;
+      var spy = sinon.spy(appboy, 'initializeTester');
+      analytics.once('ready', function() {
+        try {
+          analytics.assert(
+            spy.args[0][1].sdkAuthentication,
+            true
           );
           done();
         } catch (e) {
